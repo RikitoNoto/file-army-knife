@@ -3,7 +3,8 @@ import headerStyles from '../styles/Header.module.css'
 import styles from '../styles/Home.module.css'
 import {initializeIcons, Icon, Panel, PanelType, IconButton} from '@fluentui/react'
 import Link from 'next/link'
-import { useBoolean } from '@fluentui/react-hooks';
+import { useBoolean } from '@fluentui/react-hooks'
+import Header from './header'
 
 
 initializeIcons();
@@ -20,36 +21,7 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <Panel
-          isLightDismiss
-          isBlocking={false}
-          isOpen={isOpen}
-          onDismiss={dismissPanel}
-          type={PanelType.smallFixedNear}
-          hasCloseButton={false}
-        >
-          <div className={`${headerStyles.menu}`} onClick={dismissPanel}>
-            <IconButton iconProps={{iconName: 'CollapseMenu'}} title={"menu"}/>
-          </div>
-
-          <Link href="/line_counter/line_counter" className={`${headerStyles.hamburger_item}`}>
-              <Icon iconName='NumberedList' className={`${headerStyles.hamburger_item__icon}`}/>
-              Line Counter
-          </Link>
-
-          <Link href="/docment_search/docment_search" className={`${headerStyles.hamburger_item}`}>
-              <Icon iconName='DocumentSearch' className={`${headerStyles.hamburger_item__icon}`}/>
-              Search Docment
-          </Link>
-
-        </Panel>
-
-        <div className={`${headerStyles.tab_header}`}>
-          <div className={`${headerStyles.hamburger_menu}`} onClick={openPanel}>
-            <IconButton iconProps={{iconName: 'CollapseMenu'}} title={"menu"}/>
-          </div>
-        </div>
-
+        <Header></Header>
         <div className={styles.grid}>
           <Link href="/line_counter/line_counter" className={`${styles.card}`}>
             <h2>
