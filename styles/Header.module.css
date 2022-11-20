@@ -1,0 +1,40 @@
+.tab_header {
+    position: fixed;
+    width: 100%;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+.tab_header .hamburger_menu {
+    width: 50px;
+    margin-right: auto;
+    margin-top: 20px;
+}
+
+.hamburger_item {
+    display: block;
+    width:  100%;
+    margin: 10px;
+    font-size: 20px;
+    text-align: left;
+    color: inherit;
+    border: 1px solid #ffffff;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+.hamburger_item:hover,
+.hamburger_item:focus,
+.hamburger_item:active {
+    color: #0070f3;
+}
+
+.hamburger_item__icon {
+    vertical-align: middle;
+    margin: auto 10px auto 10px;
+    font-size: 25px;
+    text-align: center;
+    color: inherit;
+    border: 1px solid #ffffff;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+

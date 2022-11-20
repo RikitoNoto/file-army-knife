@@ -1,8 +1,16 @@
 import Head from 'next/head'
-import Image from 'next/image'
+import headerStyles from '../styles/Header.module.css'
 import styles from '../styles/Home.module.css'
+import {initializeIcons, Icon, Panel, PanelType, IconButton} from '@fluentui/react'
+import Link from 'next/link'
+import { useBoolean } from '@fluentui/react-hooks';
+
+
+initializeIcons();
 
 export default function Home() {
+  const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -12,59 +20,55 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+        <Panel
+          isLightDismiss
+          isBlocking={false}
+          isOpen={isOpen}
+          onDismiss={dismissPanel}
+          type={PanelType.smallFixedNear}
+          hasCloseButton={false}
+        >
+          <div className={`${headerStyles.menu}`} onClick={dismissPanel}>
+            <IconButton iconProps={{iconName: 'CollapseMenu'}} title={"menu"}/>
+          </div>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.tsx</code>
-        </p>
+          <Link href="/line_counter/line_counter" className={`${headerStyles.hamburger_item}`}>
+              <Icon iconName='NumberedList' className={`${headerStyles.hamburger_item__icon}`}/>
+              Line Counter
+          </Link>
+
+          <Link href="/docment_search/docment_search" className={`${headerStyles.hamburger_item}`}>
+              <Icon iconName='DocumentSearch' className={`${headerStyles.hamburger_item__icon}`}/>
+              Search Docment
+          </Link>
+
+        </Panel>
+
+        <div className={`${headerStyles.tab_header}`}>
+          <div className={`${headerStyles.hamburger_menu}`} onClick={openPanel}>
+            <IconButton iconProps={{iconName: 'CollapseMenu'}} title={"menu"}/>
+          </div>
+        </div>
 
         <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+          <Link href="/line_counter/line_counter" className={`${styles.card}`}>
+            <h2>
+              <Icon iconName='NumberedList'/>
+            </h2>
+            <h2>Line Counter</h2>
+          </Link>
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+          <Link href="/docment_search/docment_search" className={styles.card}>
+            <h2  >
+              <Icon iconName='DocumentSearch'/>
+            </h2>
+            <h2>Search Docment</h2>
+          </Link>
         </div>
+
       </main>
 
       <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
       </footer>
     </div>
   )
