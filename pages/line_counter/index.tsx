@@ -1,10 +1,11 @@
 import Head from 'next/head'
 import { open } from "@tauri-apps/api/dialog";
-import styles from '../../styles/line_counter.module.css'
+import styles from '/styles/line_counter.module.css'
 import {initializeIcons, Icon, IconButton} from '@fluentui/react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Button, Card, Col, Row} from "react-bootstrap"
-import Header from '../../components/layouts/header'
+import Header from 'components/layouts/header'
+import SearchCard from 'components/elements/line_counter/search_card'
 
 
 initializeIcons();
@@ -34,7 +35,7 @@ export default function LineCounter() {
             </Row>
           </Card.Body>
         </Card>
-
+        <SearchCard></SearchCard>
       </main>
 
       <footer className={styles.footer}>
