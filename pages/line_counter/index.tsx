@@ -1,13 +1,11 @@
 import Head from 'next/head'
 import { open } from "@tauri-apps/api/dialog";
 import styles from '/styles/line_counter.module.css'
-import {IIconProps, initializeIcons, IconButton} from '@fluentui/react'
+import {initializeIcons} from '@fluentui/react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Button, Card, Col, Row} from "react-bootstrap"
 import Header from 'components/layouts/header'
 import SearchCard from 'components/elements/line_counter/search_card'
-
-const ADD_ICON: IIconProps = { iconName: 'CircleAdditionSolid' };
 
 initializeIcons();
 
@@ -36,9 +34,9 @@ export default function LineCounter() {
             </Row>
           </Card.Body>
         </Card>
-        <SearchCard></SearchCard>
+        <SearchCard gridSize={12}></SearchCard>
 
-        <IconButton iconProps={ADD_ICON} title="Add conditions" className={`${styles.add_button}`}/>
+        <Button variant="primary" type='button' className={`${styles.add_button} rounded-circle`}>+</Button>
       </main>
 
       <footer className={styles.footer}>

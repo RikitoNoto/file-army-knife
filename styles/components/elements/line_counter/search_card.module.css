@@ -1,9 +1,15 @@
 
 .search_card {
   margin: 10px;
-  padding: 10px;
+  padding: 20px 10px;
+  border-left: solid 6px #efcc4c;
+  /* background-color: #fcf5dd; */
 }
 
 .input_field {
   margin-bottom: 5px;
+}
+
+.input_field__input_area {
+  /* background-color: #fcf5dd; */
 }
