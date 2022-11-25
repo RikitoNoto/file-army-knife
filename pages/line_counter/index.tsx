@@ -22,7 +22,7 @@ export default function LineCounter() {
       <main className={styles.main}>
         <Header></Header>
 
-        <Card className={`${styles.path_container} col-10`}>
+        <Card className={`${styles.path_container} col-11`}>
           <Card.Body>
             <Row>
               <Col xs={10}>
