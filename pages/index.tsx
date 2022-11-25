@@ -4,7 +4,7 @@ import styles from '../styles/Home.module.css'
 import {initializeIcons, Icon, Panel, PanelType, IconButton} from '@fluentui/react'
 import Link from 'next/link'
 import { useBoolean } from '@fluentui/react-hooks'
-import Header from './header'
+import Header from '../components/layouts/header'
 
 
 initializeIcons();
@@ -23,14 +23,14 @@ export default function Home() {
       <main className={styles.main}>
         <Header></Header>
         <div className={styles.grid}>
-          <Link href="/line_counter/line_counter" className={`${styles.card}`}>
+          <Link href="/line_counter" className={`${styles.card}`}>
             <h2>
               <Icon iconName='NumberedList'/>
             </h2>
             <h2>Line Counter</h2>
           </Link>
 
-          <Link href="/docment_search/docment_search" className={styles.card}>
+          <Link href="/docment_search" className={styles.card}>
             <h2  >
               <Icon iconName='DocumentSearch'/>
             </h2>

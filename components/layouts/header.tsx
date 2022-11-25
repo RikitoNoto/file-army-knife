@@ -1,7 +1,7 @@
 import {initializeIcons, Icon, Panel, PanelType, IconButton} from '@fluentui/react'
 import { useBoolean } from '@fluentui/react-hooks';
 import Link from 'next/link'
-import headerStyles from '../styles/Header.module.css'
+import headerStyles from '/styles/Header.module.css'
 
 const Header = () => {
     const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
