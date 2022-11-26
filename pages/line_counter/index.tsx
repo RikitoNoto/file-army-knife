@@ -1,19 +1,23 @@
 import Head from 'next/head'
 import { open } from "@tauri-apps/api/dialog";
-import styles from '/styles/line_counter.module.css'
-import {initializeIcons} from '@fluentui/react'
+import styles from '/styles/line_counter.module.scss'
+import {IIconProps, IconButton, initializeIcons, Pivot, PivotItem, ProgressIndicator} from '@fluentui/react'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {Button, Card, Col, Row} from "react-bootstrap"
+import {Button, Card, Col, Container, Form, InputGroup, Row} from "react-bootstrap"
 import Header from 'components/layouts/header'
 import SearchCard from 'components/elements/line_counter/search_card'
 import React from "react";
+import { invoke } from '@tauri-apps/api/tauri';
 
 initializeIcons();
 
 type Props = {
 }
 
+const PLAY_ICON: IIconProps = {iconName: "Play"};
+
 class LineCounterPage  extends React.Component<Props, {}> {
+
 	render(): React.ReactNode {
     return (
       <div className={styles.container}>
@@ -26,21 +30,50 @@ class LineCounterPage  extends React.Component<Props, {}> {
         <main className={styles.main}>
           <Header></Header>
 
-          <Card className={`${styles.path_container} col-11`}>
-            <Card.Body>
+          <div className={`${styles.top_bar}`}>
+            <Container className={`${styles.path_container} col-11`}>
               <Row>
-                <Col xs={10}>
-                  <Card body className={`${styles.path_display}`}>please select path.</Card>
+                <Col xs={8}>
+                  <InputGroup>
+                    <Form.Control placeholder="input the path" className={`${styles.input_field__input_area}`}/>
+                  </InputGroup>
                 </Col>
                 <Col xs={2} className={`${styles.select_button_container}`}>
                   <Button variant="outline-primary" type='button'>Select</Button>
                 </Col>
-              </Row>
-            </Card.Body>
-          </Card>
-          <SearchCard gridSize={12}></SearchCard>
 
-          <Button variant="primary" type='button' className={`${styles.add_button} rounded-circle`}>+</Button>
+                <Col xs={2} >{/*className={`${}`}>*/}
+                  <IconButton iconProps={PLAY_ICON}></IconButton>
+                </Col>
+              </Row>
+            </Container>
+          </div>
+
+          <div className={`${styles.pane_separator}`}>
+            <ProgressIndicator percentComplete={undefined} className={`${styles.progress}`}/>
+          </div>
+
+
+          <Pivot className={`${styles.operation_pane}`}>
+            <PivotItem headerText='conditions'>
+              <SearchCard gridSize={12}></SearchCard>
+              <Button variant="primary" type='button' className={`${styles.add_button} rounded-circle`} onClick={this.onClickAddButton}>+</Button>
+            </PivotItem>
+            <PivotItem headerText='result'>
+
+            <Container>
+              <Row className="justify-content-md-center">
+                <Col xs={10}>
+                <Card body className={`${styles.result_card}`}>
+                  <p>Line count: 1000</p>
+                </Card>
+                </Col>
+              </Row>
+            </Container>
+            </PivotItem>
+
+          </Pivot>
+
         </main>
 
         <footer className={styles.footer}>
@@ -49,6 +82,21 @@ class LineCounterPage  extends React.Component<Props, {}> {
     );
   }
 
+  onClickAddButton(): void{
+
+    // let properties = {
+    //   defaultPath: '',
+    //   directory: true,
+    //   filters: [{
+    //     extensions: ['txt', 'gif'], name: "*"
+    //   }]
+    // };
+
+    // open(properties).then((pathStr) => {
+    //   invoke('input_start_string', {startStr: pathStr}).then(console.log).catch(console.error);
+    // });
+
+  }
 
 }
 
