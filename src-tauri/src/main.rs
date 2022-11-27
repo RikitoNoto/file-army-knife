@@ -8,8 +8,10 @@ mod line_counter;
 fn main() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
-      line_counter::line_counter::input_start_string,
+      line_counter::repository::commands::command::start,
     ])
-    .run(tauri::generate_context!())
+    .run(
+      tauri::generate_context!()
+    )
     .expect("error while running tauri application");
 }
