@@ -30,6 +30,18 @@ pub mod line_counter {
 
   fn slice_between_string_with_plain_text<'a>(_target_str: &'a str, _start_str: &str, _end_str: &str) -> Vec<&'a str>{
     let mut _vec: Vec<&str> = Vec::new();
+    let mut _str = _target_str;
+
+    while let Some((_slice, _remain)) = seach_slice_first(_str, _start_str, _end_str) {
+      _vec.push(_slice);
+      _str = _remain;
+    }
+
+    _vec
+  }
+
+  fn seach_slice_first<'a>(_target_str: &'a str, _start_str: &str, _end_str: &str) -> Option<(&'a str, &'a str)>{
+    let _slice_str: &str;
     let _start_point = _target_str.find(_start_str);
     let mut _start_len = 0;
 
@@ -44,12 +56,15 @@ pub mod line_counter {
 
     if _start_point.is_some() && _end_point.is_some(){
       if _start_point.unwrap() < _end_point.unwrap(){
-        _vec.push(&(_target_str[_start_point.unwrap() + _start_len .. _end_point.unwrap()]));
+        _slice_str = &(_target_str[_start_point.unwrap() + _start_len .. _end_point.unwrap()]);
+        return Some((_slice_str, &_target_str[_end_point.unwrap()+_end_str.len()..]));
       }
     }
 
-    _vec
+    None
   }
+
+
 }
 
 
@@ -68,7 +83,6 @@ mod tests {
   /// # Expect
   /// * `vector length` - 0
   #[test]
-  #[ignore]
   fn should_be_return_empty_vec_when_target_arg_is_all_empty() {
     let slice_string: Vec<&str> = line_counter::slice_between_string("", "", "", false);
     assert_eq!(slice_string.len(), 0);
@@ -177,5 +191,22 @@ mod tests {
     let slice_string: Vec<&str> = line_counter::slice_between_string("s.*t\nt\na\nende.*d", "s.*t\n", "e.*d", false);
     assert_eq!(slice_string.len(), 1);
     assert_eq!(slice_string[0], "t\na\nend");
+  }
+
+  /// should be able to slice some chars.
+  /// # Arguments
+  /// * `_target_str` - "start\na\nendstart\nb\nend"
+  /// * `_start_str` - "start\n"
+  /// * `_end_str` - "end"
+  /// * `_use_regex_start_end` - false
+  /// # Expect
+  /// * `vector length` - 2
+  /// * `vector content` - ["a", "b"]
+  #[test]
+  fn should_be_able_to_slice_some_chars() {
+    let slice_string: Vec<&str> = line_counter::slice_between_string("start\na\nendstart\nb\nend", "start\n", "end", false);
+    assert_eq!(slice_string.len(), 2);
+    assert_eq!(slice_string[0], "a\n");
+    assert_eq!(slice_string[1], "b\n");
   }
 }
