@@ -31,39 +31,34 @@ pub mod line_counter {
   fn slice_between_string_with_plain_text<'a>(_target_str: &'a str, _start_str: &str, _end_str: &str) -> Vec<&'a str>{
     let mut _vec: Vec<&str> = Vec::new();
     let mut _str = _target_str;
-
-    while let Some((_slice, _remain)) = seach_slice_first(_str, _start_str, _end_str) {
-      _vec.push(_slice);
-      _str = _remain;
-    }
+    seach_slice(_target_str, _start_str, _end_str, &mut _vec);
 
     _vec
   }
 
-  fn seach_slice_first<'a>(_target_str: &'a str, _start_str: &str, _end_str: &str) -> Option<(&'a str, &'a str)>{
-    let _slice_str: &str;
-    let _start_point = _target_str.find(_start_str);
-    let mut _start_len = 0;
+  fn seach_slice<'a>(target_str: &'a str, start_str: &str, end_str: &str, vec: & mut Vec<&'a str>){
+    let slice_str: &str;
+    let start_point = target_str.find(start_str);
+    let mut start_len = 0;
 
-    if _target_str.find(&(format!("{}\n", _start_str))).is_some(){
-      _start_len = _start_str.len() + 1;
+    if target_str.find(&(format!("{}\n", start_str))).is_some(){
+      start_len = start_str.len() + 1;
     }
-    else if _start_point.is_some(){
-      _start_len = _start_str.len();
+    else if start_point.is_some(){
+      start_len = start_str.len();
     }
 
-    let _end_point =_target_str.find(_end_str);
+    let end_point = target_str.find(end_str);
 
-    if _start_point.is_some() && _end_point.is_some(){
-      if _start_point.unwrap() < _end_point.unwrap(){
-        _slice_str = &(_target_str[_start_point.unwrap() + _start_len .. _end_point.unwrap()]);
-        return Some((_slice_str, &_target_str[_end_point.unwrap()+_end_str.len()..]));
+    if start_point.is_some() && end_point.is_some(){
+      if start_point.unwrap() < end_point.unwrap(){
+        slice_str = &(target_str[start_point.unwrap() + start_len .. end_point.unwrap()]);
+        vec.push(slice_str);
+        seach_slice(&target_str[end_point.unwrap() + end_str.len()..], start_str, end_str, vec)
       }
     }
 
-    None
   }
-
 
 }
 
