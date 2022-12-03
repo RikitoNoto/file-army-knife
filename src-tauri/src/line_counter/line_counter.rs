@@ -4,36 +4,33 @@ pub mod line_counter {
   extern crate regex;
   use regex::Regex;
 
-  pub fn slice_between_string<'a>(_target_str: &'a str, _start_str: &str, _end_str: &str, _use_regex_start_end: bool) -> Vec<&'a str>{
-    if _use_regex_start_end {
-      slice_between_string_with_regex(_target_str, _start_str, _end_str)
+
+
+
+  pub fn slice_between_string<'a>(target_str: &'a str, start_str: &str, end_str: &str, use_regex_start_end: bool) -> Vec<&'a str>{
+    let mut vec: Vec<&str> = Vec::new();
+    if use_regex_start_end {
+      search_slice_with_regex(target_str, start_str, end_str, &mut vec);
     }
     else {
-      slice_between_string_with_plain_text(_target_str, _start_str, _end_str)
+      seach_slice(target_str, start_str, end_str, &mut vec);
     }
+
+    vec
   }
 
-  fn slice_between_string_with_regex<'a>(_target_str: &'a str, _start_str: &str, _end_str: &str) -> Vec<&'a str>{
-    let _re = Regex::new(&format!(r"(?s){}(?:\n)?(.*){}", _start_str, _end_str)).unwrap();
-    let _cap = _re.captures(_target_str);
-    let mut _vec = Vec::new();
+  fn search_slice_with_regex<'a>(target_str: &'a str, start_str: &str, end_str: &str, vec: & mut Vec<&'a str>){
+    let re = Regex::new(&format!(r"(?s)(?:{}\n?(.*?){}(.*))", start_str, end_str)).unwrap();
+    let cap = re.captures(target_str);
 
-    match _cap {
+    match cap {
       None => {},
       Some(v) => {
-        _vec.push(v.get(1).map_or("", |s| s.as_str()));
+        vec.push(v.get(1).map_or("", |s| s.as_str()));
+        search_slice_with_regex(v.get(2).map_or("", |s| s.as_str()), start_str, end_str, vec);
       },
     }
 
-    _vec
-  }
-
-  fn slice_between_string_with_plain_text<'a>(_target_str: &'a str, _start_str: &str, _end_str: &str) -> Vec<&'a str>{
-    let mut _vec: Vec<&str> = Vec::new();
-    let mut _str = _target_str;
-    seach_slice(_target_str, _start_str, _end_str, &mut _vec);
-
-    _vec
   }
 
   fn seach_slice<'a>(target_str: &'a str, start_str: &str, end_str: &str, vec: & mut Vec<&'a str>){
@@ -200,6 +197,23 @@ mod tests {
   #[test]
   fn should_be_able_to_slice_some_chars() {
     let slice_string: Vec<&str> = line_counter::slice_between_string("start\na\nendstart\nb\nend", "start\n", "end", false);
+    assert_eq!(slice_string.len(), 2);
+    assert_eq!(slice_string[0], "a\n");
+    assert_eq!(slice_string[1], "b\n");
+  }
+
+  /// should be able to slice some chars with regex.
+  /// # Arguments
+  /// * `_target_str` - "start\na\nendstart\nb\nend"
+  /// * `_start_str` - "s.*t\n"
+  /// * `_end_str` - "e.d"
+  /// * `_use_regex_start_end` - true
+  /// # Expect
+  /// * `vector length` - 2
+  /// * `vector content` - ["a", "b"]
+  #[test]
+  fn should_be_able_to_slice_some_chars_with_regex() {
+    let slice_string: Vec<&str> = line_counter::slice_between_string("start\na\nendstart\nb\nend", "s.*?t\n", "e.d", true);
     assert_eq!(slice_string.len(), 2);
     assert_eq!(slice_string[0], "a\n");
     assert_eq!(slice_string[1], "b\n");
