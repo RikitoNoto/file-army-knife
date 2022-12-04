@@ -4,6 +4,7 @@
 )]
 
 mod line_counter;
+mod util;
 
 fn main() {
   tauri::Builder::default()
