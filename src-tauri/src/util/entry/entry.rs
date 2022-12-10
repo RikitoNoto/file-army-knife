@@ -1,13 +1,20 @@
 
 pub mod entry{
 
-  use std::path::Path;
+  use std::io;
+  use std::fs::{self, DirEntry};
+
   pub struct ExploreInfo{
     pub path: String,
   }
 
-  pub fn enumrate_file(info: &ExploreInfo) -> Vec<&Path>{
-    Vec::<&Path>::new()
+  pub fn enumrate_file(info: ExploreInfo) -> io::Result<Vec<DirEntry>>{
+    let mut vec: Vec<DirEntry> = Vec::new();
+    for entry in fs::read_dir(info.path)? {
+      let entry = entry?;
+      vec.push(entry);
+    }
+    Ok(vec)
   }
 }
 
@@ -18,6 +25,8 @@ mod tests{
 
   use speculate::speculate;
   use rstest::*;
+  use std::thread;
+  use std::time;
 
   use std::fs;
   use std::path::Path;
@@ -29,10 +38,12 @@ mod tests{
 
     describe "enumrate_file test"{
       before{
+        thread::sleep(time::Duration::from_millis(1)); // wait remove file of before tests.
         // create temp directory.
         if !Path::new("temp").exists(){
-          if let Err(_) = fs::create_dir("temp") {
-            assert!(false);
+          if let Err(e) = fs::create_dir("temp") {
+            println!("{}",e);
+            panic!("failed create dir.");
           }
         }
       }
@@ -40,8 +51,19 @@ mod tests{
       after{
         if Path::new("temp").exists(){
           // remove temp directory.
-          if let Err(_) = fs::remove_dir_all("temp") {
-            assert!(false);
+          if let Err(e) = fs::remove_dir_all("temp") {
+            println!("{}",e);
+            panic!("failed remove dir.");
+          }
+        }
+      }
+
+      fn create_file(path: &str) -> fs::File{
+        match fs::File::create(path){
+          Ok(f) => f,
+          Err(e) => {
+            println!("{}", e);
+            panic!("failed create file.");
           }
         }
       }
@@ -50,19 +72,30 @@ mod tests{
         let info = ExploreInfo{
           path: "temp".to_string(),
         };
-        let path_vec = enumrate_file(&info);
-        assert_eq!(path_vec.len(), 0);
+        let result = enumrate_file(info);
+        if let Ok(path_vec) = result{
+          assert_eq!(path_vec.len(), 0);
+        }
+        else{
+          panic!("did not get ok.");
+        }
       }
 
       it "should be get one file when dir has a file"{
-        fs::File::create("temp/temp.a");
+        create_file("temp/temp.a");
         let info = ExploreInfo{
           path: "temp".to_string(),
         };
 
-        let path_vec = enumrate_file(&info);
-        assert_eq!(path_vec.len(), 1);
-        assert_eq!(path_vec[0].display().to_string(), "temp/temp.a");
+        let result = enumrate_file(info);
+
+        if let Ok(path_vec) = result{
+          assert_eq!(path_vec.len(), 1);
+          assert_eq!(path_vec[0].path().into_os_string().into_string().unwrap(), "temp/temp.a");
+        }
+        else{
+          panic!("did not get ok.");
+        }
       }
     }
 
