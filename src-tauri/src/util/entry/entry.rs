@@ -4,28 +4,23 @@ pub mod entry{
   use std::io;
   use std::fs::{self, DirEntry};
 
-  pub struct ExploreInfo{
-    pub path: String,
-  }
+  // pub fn select_file()
 
   /// enumrate files in a directory.
   /// This function search recursively.
   ///
-  pub fn enumrate_file(info: ExploreInfo) -> io::Result<Vec<DirEntry>>
+  pub fn enumrate_file(path: String) -> io::Result<Vec<DirEntry>>
   {
     let mut vec: Vec<DirEntry> = Vec::new();
     // read entry in directory.
-    for entry in fs::read_dir(info.path)? {
+    for entry in fs::read_dir(path)? {
       let entry: DirEntry = entry?;
 
       // if the entry is a directory.
       if entry.file_type()?.is_dir() {
         // enumrate children of entry.
-        let mut children = enumrate_file(
-          ExploreInfo{
-            path: entry.path().into_os_string().into_string().unwrap()
-          }
-        )?;
+        let mut children = enumrate_file(entry.path().into_os_string().into_string().unwrap())?;
+
         vec.append(&mut children);  // add children to vec.
       }
       else{
@@ -54,7 +49,6 @@ mod tests{
   use super::entry;
 
   speculate!{
-    use super::entry::ExploreInfo;
     use super::entry::enumrate_file;
 
     #[cfg(target_os = "windows")]
@@ -152,19 +146,17 @@ mod tests{
 
       /// create fixture of [`ExploreInfo`] from path.
       ///
-      fn explore_info_path(path: &str) -> ExploreInfo
+      fn explore_info_path(path: &str) -> String
       {
-        ExploreInfo{
-          path: path.to_string(),
-        }
+        path.to_string()
       }
 
       /// check return values of [`enumrate_file`].
       /// - vector length should  be expect length.
       /// - vector contents should  be expect content.
-      fn check_enumrate_file(info: ExploreInfo , expect_len: usize, expect_path_vec: Vec<&str>)
+      fn check_enumrate_file(path: String , expect_len: usize, expect_path_vec: Vec<&str>)
       {
-        match enumrate_file(info){
+        match enumrate_file(path){
           Ok(v) => {
             assert_eq!(v.len(), expect_len);
 
