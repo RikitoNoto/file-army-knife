@@ -4,7 +4,11 @@ pub mod entry{
   use std::io;
   use std::fs::{self, DirEntry};
 
-  // pub fn select_file()
+  pub fn select_files(file_vec: Vec<DirEntry>, pattern: &str) -> Vec<DirEntry>
+  {
+    let vec: Vec<DirEntry> = Vec::new();
+    vec
+  }
 
   /// enumrate files in a directory.
   /// This function search recursively.
@@ -45,104 +49,104 @@ mod tests{
   use speculate::speculate;
   use std::path::Path;
 
-  use std::fs;
+  use std::fs::{self, DirEntry};
   use super::entry;
 
   speculate!{
-    use super::entry::enumrate_file;
 
     #[cfg(target_os = "windows")]
     use std::os::windows::fs::symlink_file as symlink;
     #[cfg(not(target_os = "windows"))]
     use std::os::unix::fs::symlink;
 
+    before
+    {
+      remove_temp_dir(); // crean dir, because it do not clean when fail test.
+
+      // create temp directory.
+      if !Path::new("temp").exists(){
+        create_dir("temp");
+      }
+    }
+
+    after
+    {
+      remove_temp_dir();
+    }
+
+    /// remove temp dir include children.
+    ///
+    fn remove_temp_dir()
+    {
+      if Path::new("temp").exists(){
+        // remove temp directory.
+        if let Err(e) = fs::remove_dir_all("temp") {
+          println!("{}",e);
+          panic!("failed remove dir.");
+        }
+      }
+    }
+
+    /// create dir recursively.
+    ///
+    fn create_dir(path: &str)
+    {
+      if let Err(e) = fs::create_dir_all(path) {
+        println!("{}",e);
+        panic!("failed create dir.");
+      }
+    }
+
+    /// create a file recursively.
+    ///
+    fn create_file(path: &str) -> fs::File
+    {
+      if let Some(p) = Path::new(path).parent(){
+        if !p.exists() {
+          create_dir(p.to_str().unwrap());
+        }
+      }
+
+      match fs::File::create(path){
+        Ok(f) => f,
+        Err(e) => {
+          println!("{}", e);
+          panic!("failed create file.");
+        }
+      }
+    }
+
+    /// create a symbolic link recursively.
+    ///
+    fn create_symlink(link_info: (&str, &str))
+    {
+      let (src_path, link_path) = link_info;
+      if let Some(p) = Path::new(link_path).parent(){
+        if !p.exists() {
+          create_dir(p.to_str().unwrap());
+        }
+      }
+
+      match symlink(src_path, link_path){
+        Ok(f) => f,
+        Err(e) => {
+          println!("{}", e);
+          panic!("failed create file.");
+        }
+      }
+    }
+
+    /// create files in [`dir`].
+    ///
+    fn create_files_in(dir: &str, files: Vec<&str>)
+    {
+      for file in files{
+        create_file(Path::new(dir).join(file).to_str().unwrap());
+      }
+    }
 
     describe "enumrate_file test"{
-      before
-      {
-        remove_temp_dir(); // crean dir, because it do not clean when fail test.
-
-        // create temp directory.
-        if !Path::new("temp").exists(){
-          create_dir("temp");
-        }
-      }
-
-      after
-      {
-        remove_temp_dir();
-      }
-
-      /// remove temp dir include children.
-      ///
-      fn remove_temp_dir()
-      {
-        if Path::new("temp").exists(){
-          // remove temp directory.
-          if let Err(e) = fs::remove_dir_all("temp") {
-            println!("{}",e);
-            panic!("failed remove dir.");
-          }
-        }
-      }
-
-      /// create dir recursively.
-      ///
-      fn create_dir(path: &str)
-      {
-        if let Err(e) = fs::create_dir_all(path) {
-          println!("{}",e);
-          panic!("failed create dir.");
-        }
-      }
-
-      /// create a file recursively.
-      ///
-      fn create_file(path: &str) -> fs::File
-      {
-        if let Some(p) = Path::new(path).parent(){
-          if !p.exists() {
-            create_dir(p.to_str().unwrap());
-          }
-        }
-
-        match fs::File::create(path){
-          Ok(f) => f,
-          Err(e) => {
-            println!("{}", e);
-            panic!("failed create file.");
-          }
-        }
-      }
-
-      /// create a symbolic link recursively.
-      ///
-      fn create_symlink(link_info: (&str, &str))
-      {
-        let (src_path, link_path) = link_info;
-        if let Some(p) = Path::new(link_path).parent(){
-          if !p.exists() {
-            create_dir(p.to_str().unwrap());
-          }
-        }
-
-        match symlink(src_path, link_path){
-          Ok(f) => f,
-          Err(e) => {
-            println!("{}", e);
-            panic!("failed create file.");
-          }
-        }
-      }
-
-      /// create files in [`dir`].
-      ///
-      fn create_files_in(dir: &str, files: Vec<&str>)
-      {
-        for file in files{
-          create_file(Path::new(dir).join(file).to_str().unwrap());
-        }
-      }
+      use super::entry::enumrate_file;
 
       /// create fixture of [`ExploreInfo`] from path.
       ///
@@ -205,6 +209,32 @@ mod tests{
       it "should be not eternal loop by symbolic link"{
         create_symlink(("temp", "temp/temp.link"));
         check_enumrate_file(explore_info_path("temp"), 1, vec!["temp/temp.link"]);
+      }
+
+    }
+
+
+    describe "select_files test"{
+      use super::entry::select_files;
+      before
+      {
+      }
+
+      after
+      {
+      }
+
+      it "should be get empty vec from empty vec and empty pattern"{
+        let vec: Vec<DirEntry> = Vec::new();
+        assert_eq!(select_files(vec, "").len(), 0);
+      }
+
+      it "should be get empty vec from a_content vec and empty pattern"{
+        let vec: Vec<DirEntry> = Vec::new();
+        // vec.push(DirEntry{
+
+        // })
+        assert_eq!(select_files(vec, "").len(), 0);
       }
 
     }
