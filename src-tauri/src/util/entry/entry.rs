@@ -4,31 +4,62 @@ pub mod entry{
   use std::io;
   use std::fs::{self, DirEntry};
 
-  pub fn select_files(file_vec: Vec<DirEntry>, pattern: &str) -> Vec<DirEntry>
+use tauri::utils::assets::phf::map::Entries;
+
+  #[derive(Clone)]
+  #[derive(Debug)]
+  #[derive(PartialEq)]
+  pub enum EntryType{
+    Directory,
+    File,
+    Symlink,
+  }
+
+
+  #[derive(PartialEq)]
+  #[derive(Clone)]
+  pub struct Entry{
+    pub entry_type: EntryType,
+    pub path: String,
+  }
+
+  pub fn select_files(file_vec: Vec<Entry>, pattern: &str) -> Vec<Entry>
   {
-    let vec: Vec<DirEntry> = Vec::new();
-    vec
+    file_vec
   }
 
   /// enumrate files in a directory.
   /// This function search recursively.
   ///
-  pub fn enumrate_file(path: String) -> io::Result<Vec<DirEntry>>
+  pub fn enumrate_file(path: String) -> io::Result<Vec<Entry>>
   {
-    let mut vec: Vec<DirEntry> = Vec::new();
+    let mut vec: Vec<Entry> = Vec::new();
     // read entry in directory.
-    for entry in fs::read_dir(path)? {
-      let entry: DirEntry = entry?;
+    for pick_entry in fs::read_dir(path)? {
+      let dir_entry: DirEntry = pick_entry?;
 
       // if the entry is a directory.
-      if entry.file_type()?.is_dir() {
+      if dir_entry.file_type()?.is_dir() {
         // enumrate children of entry.
-        let mut children = enumrate_file(entry.path().into_os_string().into_string().unwrap())?;
+        let mut children = enumrate_file(dir_entry.path().into_os_string().into_string().unwrap())?;
 
         vec.append(&mut children);  // add children to vec.
       }
       else{
-        vec.push(entry);
+
+        if dir_entry.file_type()?.is_file() {
+          vec.push(Entry{
+            path: dir_entry.path().into_os_string().into_string().unwrap(),
+            entry_type: EntryType::File,
+          });
+        }
+        else{
+          vec.push(Entry{
+            path: dir_entry.path().into_os_string().into_string().unwrap(),
+            entry_type: EntryType::Symlink,
+          });
+        }
+
       }
     }
     Ok(vec)
@@ -165,7 +196,7 @@ mod tests{
             assert_eq!(v.len(), expect_len);
 
             for entry in v{
-              assert!(expect_path_vec.contains(&(entry.path().into_os_string().into_string().unwrap().as_str())));
+              assert!(expect_path_vec.contains(&(entry.path.as_str())));
             }
           },
           Err(e) => {
@@ -216,6 +247,9 @@ mod tests{
 
     describe "select_files test"{
       use super::entry::select_files;
+      use super::entry::Entry;
+      use super::entry::EntryType;
+
       before
       {
       }
@@ -224,22 +258,70 @@ mod tests{
       {
       }
 
+      fn entries_vec_eq(expect: &Vec<Entry>, actual: &Vec<Entry>){
+        assert_eq!(expect.len(), actual.len());  // should be same two length.
+
+        let mut actual_vec = actual.clone(); // create clone. [`actual`] does not use.
+
+        for expect_entry in expect {
+          for (i, actual_entry) in actual_vec.iter().enumerate() {
+            if expect_entry == actual_entry {
+              actual_vec.remove(i);
+              break;
+            }
+
+          }
+        }
+        assert_eq!(0, actual_vec.len());
+      }
+
+      fn check_entry_vec(pattern: &str, entry_vec: Vec<Entry>, expect_vec: Vec<Entry>){
+        let actual_vec = select_files(entry_vec.clone(), pattern);
+        entries_vec_eq(&expect_vec, &actual_vec);
+      }
+
       it "should be get empty vec from empty vec and empty pattern"{
-        let vec: Vec<DirEntry> = Vec::new();
+        let vec: Vec<Entry> = Vec::new();
         assert_eq!(select_files(vec, "").len(), 0);
       }
 
-      it "should be get empty vec from a_content vec and empty pattern"{
-        let vec: Vec<DirEntry> = Vec::new();
-        // vec.push(DirEntry{
+      it "should be get a content vec from a content vec and empty pattern"{
+        check_entry_vec("",
+          vec![
+            Entry{entry_type: EntryType::File, path: String::from("temp/A.c")}
+          ],
+          vec![
+            Entry{entry_type: EntryType::File, path: String::from("temp/A.c")}
+          ]
+        );
+      }
 
-        // })
-        assert_eq!(select_files(vec, "").len(), 0);
+      it "should be get two contents vec from two contents vec and empty pattern"{
+        check_entry_vec("",
+          vec![
+            Entry{entry_type: EntryType::File, path: String::from("temp/A.c")},
+            Entry{entry_type: EntryType::File, path: String::from("temp/B.c")}
+          ],
+          vec![
+            Entry{entry_type: EntryType::File, path: String::from("temp/A.c")},
+            Entry{entry_type: EntryType::File, path: String::from("temp/B.c")}
+          ]
+        );
+      }
+
+      it "should be get a content vec from two contents vec and one hit pattern"{
+        check_entry_vec("A.c",
+          vec![
+            Entry{entry_type: EntryType::File, path: String::from("temp/A.c")},
+            Entry{entry_type: EntryType::File, path: String::from("temp/B.c")}
+          ],
+          vec![
+            Entry{entry_type: EntryType::File, path: String::from("temp/A.c")},
+          ]
+        );
       }
 
     }
-
   }
-
 
 }
