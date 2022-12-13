@@ -4,6 +4,7 @@ pub mod entry{
   use std::io;
   use std::fs::{self, DirEntry};
 
+use tauri::api::file;
 use tauri::utils::assets::phf::map::Entries;
 
   #[derive(Clone)]
@@ -25,7 +26,14 @@ use tauri::utils::assets::phf::map::Entries;
 
   pub fn select_files(file_vec: Vec<Entry>, pattern: &str) -> Vec<Entry>
   {
-    file_vec
+    let mut result_vec: Vec<Entry> = Vec::new();
+    for file in file_vec.iter(){
+      if file.path.contains(pattern) {
+        result_vec.push(file.clone());
+      }
+    }
+
+    result_vec
   }
 
   /// enumrate files in a directory.
@@ -76,8 +84,10 @@ use tauri::utils::assets::phf::map::Entries;
 #[cfg(test)]
 mod tests{
   extern crate speculate;
+  extern crate rstest;
 
   use speculate::speculate;
+  use rstest::*;
   use std::path::Path;
 
   use std::fs::{self, DirEntry};
@@ -250,14 +260,6 @@ mod tests{
       use super::entry::Entry;
       use super::entry::EntryType;
 
-      before
-      {
-      }
-
-      after
-      {
-      }
-
       fn entries_vec_eq(expect: &Vec<Entry>, actual: &Vec<Entry>){
         assert_eq!(expect.len(), actual.len());  // should be same two length.
 
@@ -285,40 +287,25 @@ mod tests{
         assert_eq!(select_files(vec, "").len(), 0);
       }
 
-      it "should be get a content vec from a content vec and empty pattern"{
-        check_entry_vec("",
-          vec![
-            Entry{entry_type: EntryType::File, path: String::from("temp/A.c")}
-          ],
-          vec![
-            Entry{entry_type: EntryType::File, path: String::from("temp/A.c")}
-          ]
-        );
-      }
+      #[rstest(pattern, input_paths, expect_paths,
+        case("", vec!["temp/A.c"], vec!["temp/A.c"]),
+        case("", vec!["temp/A.c", "temp/B.c"], vec!["temp/A.c", "temp/B.c"]),
+        case("A.c", vec!["temp/A.c", "temp/B.c"], vec!["temp/A.c"]),
+      )]
+      fn select_files_pattern_test(#[case] pattern: &str, #[case] input_paths: Vec<&str>, #[case] expect_paths: Vec<&str>){
+        let mut input_vec: Vec<Entry> = Vec::new();
+        let mut expect_vec: Vec<Entry> = Vec::new();
 
-      it "should be get two contents vec from two contents vec and empty pattern"{
-        check_entry_vec("",
-          vec![
-            Entry{entry_type: EntryType::File, path: String::from("temp/A.c")},
-            Entry{entry_type: EntryType::File, path: String::from("temp/B.c")}
-          ],
-          vec![
-            Entry{entry_type: EntryType::File, path: String::from("temp/A.c")},
-            Entry{entry_type: EntryType::File, path: String::from("temp/B.c")}
-          ]
-        );
-      }
+        for path in input_paths {
+          input_vec.push(Entry{entry_type: EntryType::File, path: String::from(path)});
+        }
 
-      it "should be get a content vec from two contents vec and one hit pattern"{
-        check_entry_vec("A.c",
-          vec![
-            Entry{entry_type: EntryType::File, path: String::from("temp/A.c")},
-            Entry{entry_type: EntryType::File, path: String::from("temp/B.c")}
-          ],
-          vec![
-            Entry{entry_type: EntryType::File, path: String::from("temp/A.c")},
-          ]
-        );
+        for path in expect_paths {
+          expect_vec.push(Entry{entry_type: EntryType::File, path: String::from(path)});
+        }
+
+        check_entry_vec(pattern, input_vec, expect_vec)
+
       }
 
     }
