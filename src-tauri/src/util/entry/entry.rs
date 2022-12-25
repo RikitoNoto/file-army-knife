@@ -4,8 +4,13 @@ pub mod entry{
   use std::io;
   use std::fs::{self, DirEntry};
 
-use tauri::api::file;
-use tauri::utils::assets::phf::map::Entries;
+  use tauri::api::file;
+  use tauri::utils::assets::phf::map::Entries;
+  use std::path::Path;
+  extern crate regex;
+  use regex::Regex;
+  extern crate path_matchers;
+  use path_matchers::{glob, PathMatcher};
 
   #[derive(Clone)]
   #[derive(Debug)]
@@ -27,8 +32,10 @@ use tauri::utils::assets::phf::map::Entries;
   pub fn select_files(file_vec: Vec<Entry>, pattern: &str) -> Vec<Entry>
   {
     let mut result_vec: Vec<Entry> = Vec::new();
+    let glob_pattern = glob(pattern).unwrap();
+
     for file in file_vec.iter(){
-      if file.path.contains(pattern) {
+      if glob_pattern.matches(&Path::new(file.path.as_str())){
         result_vec.push(file.clone());
       }
     }
@@ -39,8 +46,7 @@ use tauri::utils::assets::phf::map::Entries;
   /// enumrate files in a directory.
   /// This function search recursively.
   ///
-  pub fn enumrate_file(path: String) -> io::Result<Vec<Entry>>
-  {
+  pub fn enumrate_file(path: String) -> io::Result<Vec<Entry>>{
     let mut vec: Vec<Entry> = Vec::new();
     // read entry in directory.
     for pick_entry in fs::read_dir(path)? {
@@ -92,98 +98,99 @@ mod tests{
 
   use std::fs::{self, DirEntry};
   use super::entry;
+  #[cfg(target_os = "windows")]
+  use std::os::windows::fs::symlink_file as symlink;
+  #[cfg(not(target_os = "windows"))]
+  use std::os::unix::fs::symlink;
+
+  fn create_temp_dir(){
+    remove_temp_dir(); // crean dir, because it do not clean when fail test.
+
+    // create temp directory.
+    if !Path::new("temp").exists(){
+      create_dir("temp");
+    }
+  }
+
+  /// remove temp dir include children.
+  ///
+  fn remove_temp_dir()
+  {
+    if Path::new("temp").exists(){
+      // remove temp directory.
+      if let Err(e) = fs::remove_dir_all("temp") {
+        println!("{}",e);
+        panic!("failed remove dir.");
+      }
+    }
+  }
+
+  /// create dir recursively.
+  ///
+  fn create_dir(path: &str)
+  {
+    if let Err(e) = fs::create_dir_all(path) {
+      println!("{}",e);
+      panic!("failed create dir.");
+    }
+  }
+
+  /// create a file recursively.
+  ///
+  fn create_file(path: &str) -> fs::File
+  {
+    if let Some(p) = Path::new(path).parent(){
+      if !p.exists() {
+        create_dir(p.to_str().unwrap());
+      }
+    }
+
+    match fs::File::create(path){
+      Ok(f) => f,
+      Err(e) => {
+        println!("{}", e);
+        panic!("failed create file.");
+      }
+    }
+  }
+
+  /// create a symbolic link recursively.
+  ///
+  fn create_symlink(link_info: (&str, &str))
+  {
+    let (src_path, link_path) = link_info;
+    if let Some(p) = Path::new(link_path).parent(){
+      if !p.exists() {
+        create_dir(p.to_str().unwrap());
+      }
+    }
+
+    match symlink(src_path, link_path){
+      Ok(f) => f,
+      Err(e) => {
+        println!("{}", e);
+        panic!("failed create file.");
+      }
+    }
+  }
+
+  /// create files in [`dir`].
+  ///
+  fn create_files_in(dir: &str, files: Vec<&str>)
+  {
+    for file in files{
+      create_file(Path::new(dir).join(file).to_str().unwrap());
+    }
+  }
 
   speculate!{
 
-    #[cfg(target_os = "windows")]
-    use std::os::windows::fs::symlink_file as symlink;
-    #[cfg(not(target_os = "windows"))]
-    use std::os::unix::fs::symlink;
-
-    before
-    {
-      remove_temp_dir(); // crean dir, because it do not clean when fail test.
-
-      // create temp directory.
-      if !Path::new("temp").exists(){
-        create_dir("temp");
-      }
+    before{
+      create_temp_dir();
     }
 
-    after
-    {
+    after{
       remove_temp_dir();
-    }
-
-    /// remove temp dir include children.
-    ///
-    fn remove_temp_dir()
-    {
-      if Path::new("temp").exists(){
-        // remove temp directory.
-        if let Err(e) = fs::remove_dir_all("temp") {
-          println!("{}",e);
-          panic!("failed remove dir.");
-        }
-      }
-    }
-
-    /// create dir recursively.
-    ///
-    fn create_dir(path: &str)
-    {
-      if let Err(e) = fs::create_dir_all(path) {
-        println!("{}",e);
-        panic!("failed create dir.");
-      }
-    }
-
-    /// create a file recursively.
-    ///
-    fn create_file(path: &str) -> fs::File
-    {
-      if let Some(p) = Path::new(path).parent(){
-        if !p.exists() {
-          create_dir(p.to_str().unwrap());
-        }
-      }
-
-      match fs::File::create(path){
-        Ok(f) => f,
-        Err(e) => {
-          println!("{}", e);
-          panic!("failed create file.");
-        }
-      }
-    }
-
-    /// create a symbolic link recursively.
-    ///
-    fn create_symlink(link_info: (&str, &str))
-    {
-      let (src_path, link_path) = link_info;
-      if let Some(p) = Path::new(link_path).parent(){
-        if !p.exists() {
-          create_dir(p.to_str().unwrap());
-        }
-      }
-
-      match symlink(src_path, link_path){
-        Ok(f) => f,
-        Err(e) => {
-          println!("{}", e);
-          panic!("failed create file.");
-        }
-      }
-    }
-
-    /// create files in [`dir`].
-    ///
-    fn create_files_in(dir: &str, files: Vec<&str>)
-    {
-      for file in files{
-        create_file(Path::new(dir).join(file).to_str().unwrap());
-      }
     }
 
     describe "enumrate_file test"{
@@ -288,15 +295,18 @@ mod tests{
       }
 
       #[rstest(pattern, input_paths, expect_paths,
-        case("", vec!["temp/A.c"], vec!["temp/A.c"]),
-        case("", vec!["temp/A.c", "temp/B.c"], vec!["temp/A.c", "temp/B.c"]),
-        case("A.c", vec!["temp/A.c", "temp/B.c"], vec!["temp/A.c"]),
+        case("", vec!["temp/A.c"], vec![]),
+        case("", vec!["temp/A.c", "temp/B.c"], vec![]),
+        case("*/A.c", vec!["temp/A.c", "temp/B.c"], vec!["temp/A.c"]),
+        case("*/A.c", vec!["temp/A.c", "temp/B.c", "temp2/A.c"], vec!["temp/A.c", "temp2/A.c"]),
+        case("*.c", vec!["temp/A.c", "temp/B.c"], vec!["temp/A.c", "temp/B.c"]),
+        case("*.c", vec!["temp/A.c", "temp/B.c", "temp/Bc"], vec!["temp/A.c", "temp/B.c"]),
       )]
       fn select_files_pattern_test(#[case] pattern: &str, #[case] input_paths: Vec<&str>, #[case] expect_paths: Vec<&str>){
         let mut input_vec: Vec<Entry> = Vec::new();
         let mut expect_vec: Vec<Entry> = Vec::new();
 
-        for path in input_paths {
+        for path in input_paths.clone() {
           input_vec.push(Entry{entry_type: EntryType::File, path: String::from(path)});
         }
 
@@ -304,7 +314,7 @@ mod tests{
           expect_vec.push(Entry{entry_type: EntryType::File, path: String::from(path)});
         }
 
-        check_entry_vec(pattern, input_vec, expect_vec)
+        check_entry_vec(pattern, input_vec, expect_vec);
 
       }
 
