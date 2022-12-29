@@ -3,13 +3,14 @@
   windows_subsystem = "windows"
 )]
 
-mod line_counter;
+mod commands;
 mod util;
+mod line_counter;
 
 fn main() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
-      line_counter::repository::commands::command::start,
+      commands::commands::commands::get_enumrate_files,
     ])
     .run(
       tauri::generate_context!()

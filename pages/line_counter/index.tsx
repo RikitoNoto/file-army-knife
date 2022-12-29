@@ -84,17 +84,17 @@ class LineCounterPage  extends React.Component<Props, {}> {
 
   onClickAddButton(): void{
 
-    // let properties = {
-    //   defaultPath: '',
-    //   directory: true,
-    //   filters: [{
-    //     extensions: ['txt', 'gif'], name: "*"
-    //   }]
-    // };
+    let properties = {
+      defaultPath: '',
+      directory: true,
+      filters: [{
+        extensions: ['txt', 'gif'], name: "*"
+      }]
+    };
 
-    // open(properties).then((pathStr) => {
-    //   invoke('input_start_string', {startStr: pathStr}).then(console.log).catch(console.error);
-    // });
+    open(properties).then((pathStr) => {
+      console.log(invoke('get_enumrate_files', {path: pathStr, pattern: ""}).then(console.log).catch(console.error));
+    });
 
   }
 

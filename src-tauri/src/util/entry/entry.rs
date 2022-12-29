@@ -7,8 +7,6 @@ pub mod entry{
   use tauri::api::file;
   use tauri::utils::assets::phf::map::Entries;
   use std::path::Path;
-  extern crate regex;
-  use regex::Regex;
   extern crate path_matchers;
   use path_matchers::{glob, PathMatcher};
 
@@ -315,7 +313,6 @@ mod tests{
         }
 
         check_entry_vec(pattern, input_vec, expect_vec);
-
       }
 
     }
