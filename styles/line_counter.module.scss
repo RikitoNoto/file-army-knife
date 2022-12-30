@@ -46,3 +46,16 @@
 .result_card {
     text-align: left;
 }
+
+.input_field {
+    &__dialog_button {
+        color: #ced4da;
+        border-color: #ced4da;
+
+        &:hover {
+            background-color: #ced4da;
+            border-color: #ced4da;
+        }
+    }
+
+}

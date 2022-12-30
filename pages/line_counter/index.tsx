@@ -36,11 +36,14 @@ class LineCounterPage  extends React.Component<Props, {}> {
                 <Col xs={8}>
                   <InputGroup>
                     <Form.Control placeholder="input the path" className={`${styles.input_field__input_area}`}/>
+                    <Button variant="outline-secondary" type='button' className={`${styles.input_field__dialog_button}`} onClick={this.onClickGetPathButton}>
+                      ...
+                    </Button>
                   </InputGroup>
                 </Col>
-                <Col xs={2} className={`${styles.select_button_container}`}>
-                  <Button variant="outline-primary" type='button'>Select</Button>
-                </Col>
+                {/* <Col xs={2} className={`${styles.select_button_container}`}>
+                  <Button variant="outline-primary" type='button' onClick={this.onClickGetPathButton}>Select</Button>
+                </Col> */}
 
                 <Col xs={2} >{/*className={`${}`}>*/}
                   <IconButton iconProps={PLAY_ICON}></IconButton>
@@ -84,11 +87,16 @@ class LineCounterPage  extends React.Component<Props, {}> {
 
   onClickAddButton(): void{
 
+  }
+
+  onClickGetPathButton(): void{
+
     let properties = {
       defaultPath: '',
       directory: true,
       filters: [{
-        extensions: ['txt', 'gif'], name: "*"
+        name: "*",
+        extensions: ['txt', 'gif', 'png'],
       }]
     };
 
