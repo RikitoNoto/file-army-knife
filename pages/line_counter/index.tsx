@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import {Button, Card, Col, Container, Form, InputGroup, Row} from "react-bootstrap"
 import Header from 'components/layouts/header'
 import SearchCard from 'components/elements/line_counter/search_card'
-import React from "react";
+import React, { ReactElement } from "react";
 import { invoke } from '@tauri-apps/api/tauri';
 
 initializeIcons();
@@ -14,11 +14,33 @@ initializeIcons();
 type Props = {
 }
 
+interface State{
+  search_cards: ReactElement[];
+}
+
 const PLAY_ICON: IIconProps = {iconName: "Play"};
 
-class LineCounterPage  extends React.Component<Props, {}> {
+class LineCounterPage  extends React.Component<Props, State> {
 
-  private searchCards: React.ReactNode[];
+  private _search_cards: ReactElement[] = [];
+
+  constructor(props: Props) {
+    super(props);
+    this._search_cards.push(<SearchCard gridSize={12}></SearchCard>)
+    this.state = {
+      search_cards: this._search_cards,
+    };
+    console.log(this);
+  }
+
+  componentDidMount() {
+    console.log("call");
+
+  }
+
+  componentWillUnmount() {
+  }
+
 
 	render(): React.ReactNode {
     return (
@@ -29,36 +51,36 @@ class LineCounterPage  extends React.Component<Props, {}> {
         </Head>
 
         <main className={styles.main}>
-          <Header></Header>
+          <div className={`${styles.no_scroll_header}`}>
+            <Header></Header>
 
-          <div className={`${styles.top_bar}`}>
-            <Container className={`${styles.path_container} col-11`}>
-              <Row>
-                <Col xs={8}>
-                  <InputGroup>
-                    <Form.Control placeholder="input the path" className={`${styles.input_field__input_area}`}/>
-                    <Button variant="outline-secondary" type='button' className={`${styles.input_field__dialog_button}`} onClick={this.onClickGetPathButton}>
-                      ...
-                    </Button>
-                  </InputGroup>
-                </Col>
+            <div className={`${styles.top_bar}`}>
+              <Container className={`${styles.path_container} col-11`}>
+                <Row>
+                  <Col xs={8}>
+                    <InputGroup>
+                      <Form.Control placeholder="input the path" className={`${styles.input_field__input_area}`}/>
+                      <Button variant="outline-secondary" type='button' className={`${styles.input_field__dialog_button}`} onClick={this.onClickGetPathButton}>
+                        ...
+                      </Button>
+                    </InputGroup>
+                  </Col>
 
-                <Col xs={2} >
-                  <IconButton iconProps={PLAY_ICON} onClick={this.onClickStartButton}></IconButton>
-                </Col>
-              </Row>
-            </Container>
+                  <Col xs={2} >
+                    <IconButton iconProps={PLAY_ICON} onClick={this.onClickStartButton}></IconButton>
+                  </Col>
+                </Row>
+              </Container>
+            </div>
+
+            <div className={`${styles.pane_separator}`}>
+              <ProgressIndicator percentComplete={undefined} className={`${styles.progress}`}/>
+            </div>
           </div>
-
-          <div className={`${styles.pane_separator}`}>
-            <ProgressIndicator percentComplete={undefined} className={`${styles.progress}`}/>
-          </div>
-
 
           <Pivot className={`${styles.operation_pane}`}>
             <PivotItem headerText='conditions'>
-
-              <SearchCard gridSize={12}></SearchCard>
+              {this.state.search_cards}
               <Button variant="primary" type='button' className={`${styles.add_button} rounded-circle`} onClick={this.onClickAddButton}>+</Button>
             </PivotItem>
             <PivotItem headerText='result'>
@@ -84,8 +106,14 @@ class LineCounterPage  extends React.Component<Props, {}> {
     );
   }
 
-  onClickAddButton(): void{
-
+  onClickAddButton = () => {
+    console.log(this._search_cards);
+    console.log(this.state);
+    this._search_cards.push(<SearchCard gridSize={12}></SearchCard>);
+    // this.state.search_cards.push(<SearchCard gridSize={12}></SearchCard>);
+    this.setState({
+      search_cards: this._search_cards.concat(),
+    });
   }
 
   onClickStartButton(): void{

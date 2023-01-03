@@ -8,6 +8,14 @@
     align-items: center;
 }
 
+.no_scroll_header {
+    width: 100%;
+    position:sticky;
+    top:0;
+    background-color: white;
+    z-index: 1;
+}
+
 .top_bar {
     width: 100%;
 }

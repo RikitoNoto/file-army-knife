@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {describe, expect, test} from '@jest/globals';
 import LineCounterPage from 'pages/line_counter/index';
 import React, {ReactElement} from "react";
@@ -10,12 +10,15 @@ import React, {ReactElement} from "react";
 // });
 
 describe('add button', () => {
-    test('should be add search card on click', () => {
+    test('should be add search card on click', async () => {
         const page = new LineCounterPage({});
-        render(page.render() as ReactElement);
+        await render(page.render() as ReactElement);
         expect(screen.getAllByText('Start Text').length).toBe(1);
 
-        fireEvent.click(screen.getByText('+'));
+        await fireEvent.click(screen.getByText('+'));
+        await cleanup();
+        await render(page.render() as ReactElement);
+
         expect(screen.getAllByText('Start Text').length).toBe(2);
     });
 });

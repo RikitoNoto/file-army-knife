@@ -13,6 +13,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@expo/next-adapter": "^4.0.13",
     "@fluentui/react": "8.102.0",
     "@tauri-apps/api": "^1.2.0",
     "@types/node": "^18.11.9",
