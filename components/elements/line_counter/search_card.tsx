@@ -1,13 +1,29 @@
 import {Button, Card, Col, Container, Form, InputGroup, Row} from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import React from "react";
+import React, {Key} from "react";
 import styles from "styles/components/elements/line_counter/search_card.module.css"
+
+type OnDelete = (obj: SearchCard) => void | undefined;
 
 type Props = {
 	gridSize: number,
+	onDelete?: OnDelete,
+	dictKey: number,
 }
 
 class SearchCard extends React.Component<Props, {}> {
+
+	private _key: number;
+
+	constructor(props: Props){
+		super(props);
+		this._key = props.dictKey;
+	}
+
+	get key(): number {
+		return this._key;
+	}
+
 	render(): React.ReactNode {
 		return (
 			<Container>
@@ -22,7 +38,7 @@ class SearchCard extends React.Component<Props, {}> {
 									</InputGroup>
 								</Col>
 								<Col xs={{span: 1, offset: 0}}>
-									<Button variant="danger" type='button'>Delete</Button>
+									<Button variant="danger" type='button' onClick = {() => {if(this.props.onDelete) this.props.onDelete(this);}}>Delete</Button>
 								</Col>
 							</Row>
 							<Row>

@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import {Button, Card, Col, Container, Form, InputGroup, Row} from "react-bootstrap"
 import Header from 'components/layouts/header'
 import SearchCard from 'components/elements/line_counter/search_card'
-import React, { ReactElement } from "react";
+import React, { ReactElement, Key } from "react";
 import { invoke } from '@tauri-apps/api/tauri';
 
 initializeIcons();
@@ -15,27 +15,26 @@ type Props = {
 }
 
 interface State{
-  search_cards: ReactElement[];
+  search_cards: {[key: Key]: ReactElement};
 }
 
 const PLAY_ICON: IIconProps = {iconName: "Play"};
 
 class LineCounterPage  extends React.Component<Props, State> {
 
-  private _search_cards: ReactElement[] = [];
+  private _search_cards: {[key: Key]: ReactElement} = {};
+  // private _search_cards: ReactElement[] = [];
 
   constructor(props: Props) {
     super(props);
-    this._search_cards.push(<SearchCard gridSize={12}></SearchCard>)
+    this.addCard();
+
     this.state = {
-      search_cards: this._search_cards,
+      search_cards: Object.assign({}, this._search_cards),
     };
-    console.log(this);
   }
 
   componentDidMount() {
-    console.log("call");
-
   }
 
   componentWillUnmount() {
@@ -80,7 +79,11 @@ class LineCounterPage  extends React.Component<Props, State> {
 
           <Pivot className={`${styles.operation_pane}`}>
             <PivotItem headerText='conditions'>
-              {this.state.search_cards}
+              {
+                Object.keys(this.state.search_cards).map((key)=>
+                  this.state.search_cards[key]
+                )
+              }
               <Button variant="primary" type='button' className={`${styles.add_button} rounded-circle`} onClick={this.onClickAddButton}>+</Button>
             </PivotItem>
             <PivotItem headerText='result'>
@@ -106,15 +109,28 @@ class LineCounterPage  extends React.Component<Props, State> {
     );
   }
 
-  onClickAddButton = () => {
-    console.log(this._search_cards);
-    console.log(this.state);
-    this._search_cards.push(<SearchCard gridSize={12}></SearchCard>);
-    // this.state.search_cards.push(<SearchCard gridSize={12}></SearchCard>);
-    this.setState({
-      search_cards: this._search_cards.concat(),
-    });
+  private addCard(){
+    let key = Object.keys(this._search_cards).length + 1;
+    let element = <SearchCard key={key} dictKey={key} gridSize={12} onDelete={this.onClickDeleteButton}></SearchCard>;
+    this._search_cards[key] = element;
   }
+
+  private onClickAddButton = () => {
+    this.addCard();
+    this.setState({
+      search_cards: Object.assign({}, this._search_cards),
+    })
+  };
+
+  private onClickDeleteButton = (card: SearchCard) =>{
+    if(card.key){
+      delete this._search_cards[card.key];
+    }
+
+    this.setState({
+      search_cards: Object.assign({}, this._search_cards),
+    })
+  };
 
   onClickStartButton(): void{
 
