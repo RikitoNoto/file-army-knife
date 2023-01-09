@@ -18,6 +18,7 @@ describe('add button', () => {
         expect(screen.getAllByText('Start Text').length).toBe(1);
 
         await checkClick(page, '+');
+        await render(page.render() as ReactElement);
 
         expect(screen.getAllByText('Start Text').length).toBe(2);
     });
@@ -32,6 +33,7 @@ describe('delete button', () => {
         expect(screen.getAllByText('Start Text').length).toBe(1);
 
         await checkClick(page, 'Delete');
+        await render(page.render() as ReactElement);
 
         expect(screen.getAllByText('Start Text').length).toBe(0);
     });

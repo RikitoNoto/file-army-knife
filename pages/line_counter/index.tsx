@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import {Button, Card, Col, Container, Form, InputGroup, Row} from "react-bootstrap"
 import Header from 'components/layouts/header'
 import SearchCard from 'components/elements/line_counter/search_card'
-import React, { ReactElement, Key } from "react";
+import React, { ReactElement, Key} from "react";
 import { invoke } from '@tauri-apps/api/tauri';
 
 initializeIcons();
@@ -14,7 +14,10 @@ initializeIcons();
 type Props = {
 }
 
+type DispPane = string | undefined;
+
 interface State{
+  display_pane?: Key | null | undefined;
   search_cards: {[key: Key]: ReactElement};
 }
 
@@ -23,11 +26,12 @@ const PLAY_ICON: IIconProps = {iconName: "Play"};
 class LineCounterPage  extends React.Component<Props, State> {
 
   private _search_cards: {[key: Key]: ReactElement} = {};
-  // private _search_cards: ReactElement[] = [];
+  private _display_pane: DispPane;
 
   constructor(props: Props) {
     super(props);
     this.addCard();
+    this._display_pane = undefined;
 
     this.state = {
       search_cards: Object.assign({}, this._search_cards),
@@ -77,8 +81,9 @@ class LineCounterPage  extends React.Component<Props, State> {
             </div>
           </div>
 
-          <Pivot className={`${styles.operation_pane}`}>
+          <Pivot className={`${styles.operation_pane}`} selectedKey={undefined}>
             <PivotItem headerText='conditions'>
+              
               {
                 Object.keys(this.state.search_cards).map((key)=>
                   this.state.search_cards[key]
@@ -125,14 +130,14 @@ class LineCounterPage  extends React.Component<Props, State> {
   private onClickDeleteButton = (card: SearchCard) =>{
     if(card.key){
       delete this._search_cards[card.key];
-    }
 
-    this.setState({
-      search_cards: Object.assign({}, this._search_cards),
-    })
+      this.setState({
+        search_cards: Object.assign({}, this._search_cards),
+      })
+    }
   };
 
-  onClickStartButton(): void{
+  private onClickStartButton = () => {
 
   }
 
