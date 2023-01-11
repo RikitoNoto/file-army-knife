@@ -6,18 +6,19 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import {Button, Card, Col, Container, Form, InputGroup, Row} from "react-bootstrap"
 import Header from 'components/layouts/header'
 import SearchCard from 'components/elements/line_counter/search_card'
-import React, { ReactElement, Key} from "react";
+import React, { ReactElement, Key, useEffect} from "react";
 import { invoke } from '@tauri-apps/api/tauri';
+import { snakeCase } from 'cypress/types/lodash';
 
 initializeIcons();
 
 type Props = {
 }
 
-type DispPane = string | undefined;
+type DispPane = number | null | undefined;
 
 interface State{
-  display_pane?: Key | null | undefined;
+  display_pane?: DispPane;
   search_cards: {[key: Key]: ReactElement};
 }
 
@@ -26,16 +27,24 @@ const PLAY_ICON: IIconProps = {iconName: "Play"};
 class LineCounterPage  extends React.Component<Props, State> {
 
   private _search_cards: {[key: Key]: ReactElement} = {};
-  private _display_pane: DispPane;
 
   constructor(props: Props) {
     super(props);
     this.addCard();
-    this._display_pane = undefined;
 
     this.state = {
+      display_pane: undefined,
       search_cards: Object.assign({}, this._search_cards),
     };
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+    if(this.state.display_pane != null){
+      this.setState({
+        display_pane: undefined,
+      });
+    }
+    console.log(this.state);
   }
 
   componentDidMount() {
@@ -43,7 +52,6 @@ class LineCounterPage  extends React.Component<Props, State> {
 
   componentWillUnmount() {
   }
-
 
 	render(): React.ReactNode {
     return (
@@ -81,9 +89,10 @@ class LineCounterPage  extends React.Component<Props, State> {
             </div>
           </div>
 
-          <Pivot className={`${styles.operation_pane}`} selectedKey={undefined}>
+          <Pivot className={`${styles.operation_pane}`} selectedKey={this.state.display_pane?.toString()}>
+            {/* FIXME: no change selectedKey. when write 'String(this.state.display_pane)', the code running. but the undefined convert to 'undefined'(type of string)... */}
             <PivotItem headerText='conditions'>
-              
+
               {
                 Object.keys(this.state.search_cards).map((key)=>
                   this.state.search_cards[key]
@@ -130,15 +139,16 @@ class LineCounterPage  extends React.Component<Props, State> {
   private onClickDeleteButton = (card: SearchCard) =>{
     if(card.key){
       delete this._search_cards[card.key];
-
       this.setState({
         search_cards: Object.assign({}, this._search_cards),
-      })
+      });
     }
   };
 
   private onClickStartButton = () => {
-
+    this.setState({
+      display_pane: 1,
+    });
   }
 
   onClickGetPathButton(): void{

@@ -34,7 +34,7 @@ class SearchCard extends React.Component<Props, {}> {
 								<Col xs={{span: 10, offset: 0}}>
 									<InputGroup>
 										<InputGroup.Text>Start Text</InputGroup.Text>
-											<Form.Control placeholder="text or regular expression" className={`${styles.input_field__input_area}`}/>
+										<Form.Control placeholder="text or regular expression" className={`${styles.input_field__input_area}`}/>
 									</InputGroup>
 								</Col>
 								<Col xs={{span: 1, offset: 0}}>
@@ -45,7 +45,7 @@ class SearchCard extends React.Component<Props, {}> {
 								<Col xs={{span: 10, offset: 0}}>
 									<InputGroup>
 										<InputGroup.Text>End Text</InputGroup.Text>
-											<Form.Control placeholder="text or regular expression" className={`${styles.input_field__input_area}`}/>
+										<Form.Control placeholder="text or regular expression" className={`${styles.input_field__input_area}`}/>
 									</InputGroup>
 								</Col>
 							</Row>
